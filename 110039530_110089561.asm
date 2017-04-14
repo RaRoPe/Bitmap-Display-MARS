@@ -3,7 +3,7 @@
 #			Trabalho 1 - Programação Assembler
 #
 # Nome: Raphael Rodrigues		Matrícula: 11/0039530
-# Nome: Ulrich Koffi			Matrícula: 
+# Nome: Ulrich Koffi			Matrícula: 11/0089561
 # Nome: 				Matrícula: 
 
 .data
@@ -21,8 +21,22 @@ quebra_linha:	.asciiz "\n"
 
 .text
 
+#Inicializa a memória com a cor 0x004B0082 -> indigo
+inicializacao:
+	lw $t1, address
+	lw $t2, size
+	li $t3, 0x004B0082
+	#Armazena o endereço 10040000 em t0
+	add $t0, $zero, $t1
+	
+	j pintaFundoPreto
+
 #Label do menu principal	
 menu:
+	add $t0, $zero, $zero
+	add $t1, $zero, $zero
+	add $t2, $zero, $zero
+	
 	#Armazena em t0 o endereço do menu
 	la $t0, texto1
 	
@@ -40,6 +54,7 @@ menu:
 	#-------------------------------------------------------------------------
 	
 	beq $v0, 1, obtem_ponto
+	beq $v0, 2, desenha_ponto
 	beq $v0, 5, carregaImagem
 	beq $v0, 6, exit
 	
@@ -47,7 +62,6 @@ menu:
 	j menu
 
 obtem_ponto:
-	
 	#Carrega o endereço da string obtem_ponto_s1 em t0
 	la $t0, obtem_ponto_s1
 	
@@ -59,7 +73,7 @@ obtem_ponto:
 	#-------------------------------------------------------------------------
 	
 	#-------------------------------------------------------------------------
-	#Armazena o inteiro lido em v0 (x)
+	#Armazena o inteiro lido (x) em v0
 	li $v0, 5
 	syscall
 	#-------------------------------------------------------------------------
@@ -83,6 +97,13 @@ obtem_ponto:
 	#Restaura o valor de a0 (x)
 	move $a0, $t1
 	
+	#Inverte as posições x
+	li $t5, 63
+	sub $a0, $t5, $a0
+	
+	#Zera o registrador $t5
+	add $t5, $zero, $zero
+	
 	#-------------------------------------------------------------------------
 	#Armazena o inteiro lido em v0 (y)
 	li $v0, 5
@@ -101,8 +122,8 @@ obtem_ponto:
 	
 	#-------------------------------------------------------------------------
 	#Printa inteiro (a0)
-	li $v0, 1
-	syscall
+	#li $v0, 1
+	#syscall
 	#-------------------------------------------------------------------------
 	
 	jal quebralinha
@@ -111,10 +132,10 @@ obtem_ponto:
 	mul $a1, $a1, 4
 	#t0 = (x.256)+(y.4)
 	add $t0, $a0, $a1
-	#Pega o endereço total do pixel
+	#Pega o conteúdo do endereço total do pixel
 	lw $t1, address
-#	add $t0, $t0, $t1
-#	lw $t0, 0($t0)
+	add $t0, $t0, $t1
+	lw $t0, 0($t0)
 	
 	#-------------------------------------------------------------------------
 	#Printa inteiro (a0) 
@@ -123,23 +144,108 @@ obtem_ponto:
 	syscall
 	#-------------------------------------------------------------------------
 	
-	#Falta armazenar o valor da posição da memória + o valor de t0
-	
-#	lw $t0, 0()
-	
 	#Se começar com (1,1), x=1, y=1
 	#valor_mem = (x-1).256 + (y-1).4
 	
 	j menu
 
-#Label para fazer a operação de \n
-quebralinha:
+desenha_ponto:
+	
+#	li $t1, 255
+#	sll $t0, $t1, 16
+#	li $t1, 255
+#	sll $t2, $t1, 8
+#	xor $t0, $t0, $t2
+#Carrega o endereço da string obtem_ponto_s1 em t0
 
+	la $t0, obtem_ponto_s1
+	
 	#-------------------------------------------------------------------------
-	#Printa inteiro (a0)
-	li $v0, 1
+	#Printa para que seja digitado o valor de x
+	li $v0, 4
+	move $a0, $t0
 	syscall
 	#-------------------------------------------------------------------------
+	
+	#-------------------------------------------------------------------------
+	#Armazena o inteiro lido (x) em v0
+	li $v0, 5
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#Armazena em a0 o valor de x
+	move $a0, $v0
+	
+	#Carrega o endereço da string obtem_ponto_s2 em t0
+	la $t0, obtem_ponto_s2
+	
+	#Salva o valor de a0 (x) em t1
+	move $t1, $a0
+	
+	#-------------------------------------------------------------------------
+	#Printa para que seja digitado o valor de y
+	li $v0, 4
+	move $a0, $t0
+	syscall
+	#-------------------------------------------------------------------------
+
+	#Restaura o valor de a0 (x)
+	move $a0, $t1
+	
+	#Inverte as posições x
+	li $t5, 63
+	sub $a0, $t5, $a0
+	
+	#Zera o registrador $t5
+	add $t5, $zero, $zero
+	
+	#-------------------------------------------------------------------------
+	#Armazena o inteiro lido em v0 (y)
+	li $v0, 5
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#Armazena em a1 o valor de y
+	move $a1, $v0
+	
+	#Achar o valor correspondente à memória dado pelo par (x,y)
+	#Se começar com (0,0), x=0, y=0
+	#valor_mem = x.256 + y.4
+
+	#(x.256)
+	mul $a0, $a0, 256
+	
+	#-------------------------------------------------------------------------
+	#Printa inteiro (a0)
+	#li $v0, 1
+	#syscall
+	#-------------------------------------------------------------------------
+	
+	jal quebralinha
+	
+	#(y.4)
+	mul $a1, $a1, 4
+	#t0 = (x.256)+(y.4)
+	add $t0, $a0, $a1
+	#Pega o conteúdo do endereço total do pixel
+	lw $t1, address
+	add $t0, $t0, $t1
+	
+	#Faz o store do valor digitado
+	addi $t5, $zero, 0x00409811
+	sw $t5, 0($t0)
+	
+	#-------------------------------------------------------------------------
+	#Printa inteiro (a0) 
+	li $v0, 1
+	add $a0, $t0, $zero
+	syscall
+	#-------------------------------------------------------------------------
+	
+	j menu
+
+#Label para fazer a operação de \n
+quebralinha:
 
 	#Aloca o espaço para 1 registrador na pilha
 	addi $sp, $sp, -4
@@ -155,13 +261,19 @@ quebralinha:
 	#Desaloca o espaço de 1 registrador da pilha
 	addi $sp, $sp, 4
 	
-	#-------------------------------------------------------------------------
-	#Printa inteiro (a0)
-	li $v0, 1
-	syscall
-	#-------------------------------------------------------------------------
-	
 	jr $ra
+
+#Função para pintar todos os pixels a partir da variável address em preto
+pintaFundoPreto:
+	
+	sw $t3, 0($t0)
+
+	addi $t0, $t0, 4
+	
+	beq $t2, $zero, menu
+	addi $t2, $t2, -1
+	
+	j pintaFundoPreto
 
 # Label para carregar imagem, especificados através dos parâmentros do campo data.
 carregaImagem:
