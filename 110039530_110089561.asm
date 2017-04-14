@@ -4,11 +4,10 @@
 #
 # Nome: Raphael Rodrigues		Matrícula: 11/0039530
 # Nome: Ulrich Koffi			Matrícula: 11/0089561
-# Nome: 				Matrícula: 
 
 .data
 
-image_name:   	.asciiz "/home/nothereboy/Documents/UnB/OAC/2017_1/Trabalho 1/lenaeye.raw"   # nome da imagem a ser carregada
+image_name:   	.asciiz "lenaeye.raw"   # nome da imagem a ser carregada
 address: 	.word   0x10040000	# endereco do bitmap display na memoria	
 buffer:		.word   0		# configuracao default do MARS
 size:		.word	4096		# numero de pixels da imagem
@@ -36,6 +35,7 @@ menu:
 	add $t0, $zero, $zero
 	add $t1, $zero, $zero
 	add $t2, $zero, $zero
+	add $t3, $zero, $zero
 	
 	#Armazena em t0 o endereço do menu
 	la $t0, texto1
@@ -53,9 +53,10 @@ menu:
 	syscall
 	#-------------------------------------------------------------------------
 	
-	beq $v0, 1, obtem_ponto
-	beq $v0, 2, desenha_ponto
-	beq $v0, 5, carregaImagem
+	beq $v0, 1, obtem_ponto #get_point
+	beq $v0, 2, desenha_ponto #draw_point
+	beq $v0, 4, inicializaParaNegativo #convert_negative
+	beq $v0, 5, carregaImagem #load_image
 	beq $v0, 6, exit
 	
 	#Caso não seja igual a 6, retorna para a função menu, senão sai do programa.
@@ -275,6 +276,83 @@ pintaFundoPreto:
 	
 	j pintaFundoPreto
 
+inicializaParaNegativo:
+	# $t0 é o valor do endereço calculado da heap
+	# $t1 é o hexa que será o negativo de $t0
+	# $t2 é o valor de R
+	# $t3 é o valor de G
+	# $t4 é o valor de B
+	# $t5 é o valor de 255
+	# $t6 é o hexa para ser convertido
+	# $t7 possui size
+	
+	#Carrega o valor de 10040000 para t0
+	lw $t0, address
+	
+	#Armazena 255 em $t5
+	addi $t5, $zero, 255
+	
+	lw $t7, size
+	
+	j converte_negativo
+
+converte_negativo:
+	
+	#Lê o valor armazenado em t0
+	lw $t6, 0($t0)
+	
+	#-------------------------------------------------------------------------
+	#Conversão dos valores de RGB para negativo
+	
+	#Pega o valor do R e converte pra negativo
+	sll $t2, $t6, 8
+	srl $t2, $t2, 24
+	sub $t2, $t5, $t2
+	sll $t2, $t2, 16
+	
+	#Pega o valor do G e converte pra negativo
+	sll $t3, $t6, 16
+	srl $t3, $t3, 24
+	sub $t3, $t5, $t3
+	sll $t3, $t3, 8
+	
+	#Pega o valor do B e converte pra negativo
+	sll $t4, $t6, 24
+	srl $t4, $t4, 24
+	sub $t4, $t5, $t4
+	
+	#Faz um xor com os valores de RGB
+	xor $t1, $t2, $t3
+	xor $t1, $t1, $t4
+	#-------------------------------------------------------------------------
+	
+	#Armazena o negativo de RGB para o valor de t0
+	sw $t1, 0($t0)
+	
+	#Enquanto não percorrer toda a memória, de 4096, irá continuar convertendo os pixels para negativo
+	beq $t7, $zero, apaga_registradores
+	
+	addi $t7, $t7, -1
+	
+	#Aumenta em 4 o valor de t0
+	addi $t0, $t0, 4
+	
+	j converte_negativo
+
+#Função para zerar os registradores temporários
+apaga_registradores:
+	
+	add $t0, $zero, $zero
+	add $t1, $zero, $zero
+	add $t2, $zero, $zero
+	add $t3, $zero, $zero
+	add $t4, $zero, $zero
+	add $t5, $zero, $zero
+	add $t6, $zero, $zero
+	add $t7, $zero, $zero
+	
+	j menu
+
 # Label para carregar imagem, especificados através dos parâmentros do campo data.
 carregaImagem:
 	
@@ -291,15 +369,12 @@ carregaImagem:
 	la $a0, image_name
 	
 	#Armazena em t0 o endereço do menu
-#	move $t0, $a0
-	
+
 	#-------------------------------------------------------------------------
 	#Printa o menu
 	li $v0, 4
 	syscall
 	#-------------------------------------------------------------------------
-	
-#	move $a0, $t0
 	
 	lw $a1, address
 	la $a2, buffer
