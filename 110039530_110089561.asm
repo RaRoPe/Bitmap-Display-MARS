@@ -7,16 +7,19 @@
 
 .data
 
-image_name:   	.asciiz "lenaeye.raw"   # nome da imagem a ser carregada
+image_name:   	.asciiz "/home/nothereboy/Documents/UnB/OAC/2017_1/Trabalho 1/lenaeye.raw"   # nome da imagem a ser carregada
 address: 	.word   0x10040000	# endereco do bitmap display na memoria	
 buffer:		.word   0		# configuracao default do MARS
 size:		.word	4096		# numero de pixels da imagem
 
 texto0:		.asciiz "Carregando imagem "
 texto1:		.asciiz	"\nDefina o numero da opcao desejada\n1) Obtem ponto\n2) Desenha ponto\n3) Desenha retangulo sem preenchimento\n4) Converte para negativo da imagem\n5) Carrega imagem\n6) Encerra\n"
-obtem_ponto_s1:	.asciiz	"Digite o valor de x: \n"
-obtem_ponto_s2:	.asciiz	"Digite o valor de y: \n"
+obtem_ponto_s1:	.asciiz	"Digite o valor de x: "
+obtem_ponto_s2:	.asciiz	"Digite o valor de y: "
 quebra_linha:	.asciiz "\n"
+valor_R:	.asciiz "Digite o valor de R: "
+valor_G:	.asciiz "Digite o valor de G: "
+valor_B:	.asciiz "Digite o valor de B: "
 
 .text
 
@@ -152,13 +155,7 @@ obtem_ponto:
 
 desenha_ponto:
 	
-#	li $t1, 255
-#	sll $t0, $t1, 16
-#	li $t1, 255
-#	sll $t2, $t1, 8
-#	xor $t0, $t0, $t2
-#Carrega o endereço da string obtem_ponto_s1 em t0
-
+	#Carrega o endereço da string obtem_ponto_s1 em t0
 	la $t0, obtem_ponto_s1
 	
 	#-------------------------------------------------------------------------
@@ -189,13 +186,6 @@ desenha_ponto:
 	move $a0, $t0
 	syscall
 	#-------------------------------------------------------------------------
-
-	#Restaura o valor de a0 (x)
-	move $a0, $t1
-	
-	#Inverte as posições x
-	li $t5, 63
-	sub $a0, $t5, $a0
 	
 	#Zera o registrador $t5
 	add $t5, $zero, $zero
@@ -208,6 +198,77 @@ desenha_ponto:
 	
 	#Armazena em a1 o valor de y
 	move $a1, $v0
+	
+	#Carrega o endereço da string valor_R em t0
+	la $t0, valor_R
+	
+	#-------------------------------------------------------------------------
+	#Printa para que seja digitado o valor de R
+	li $v0, 4
+	move $a0, $t0
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#-------------------------------------------------------------------------
+	#Armazena o R em v0
+	li $v0, 5
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#Salva o valor de R em a2
+	move $a2, $v0
+	
+	#Carrega o endereço da string valor_G em t0
+	la $t0, valor_G
+	
+	#-------------------------------------------------------------------------
+	#Printa para que seja digitado o valor de G
+	li $v0, 4
+	move $a0, $t0
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#-------------------------------------------------------------------------
+	#Armazena o G em v0
+	li $v0, 5
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#Salva o valor de G em a3
+	move $a3, $v0
+	
+	sll $a2, $a2, 16
+	sll $a3, $a3, 8
+	
+	xor $a2, $a2, $a3
+	
+	#Carrega o endereço da string valor_B em t0
+	la $t0, valor_B
+	
+	#-------------------------------------------------------------------------
+	#Printa para que seja digitado o valor de B
+	li $v0, 4
+	move $a0, $t0
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#-------------------------------------------------------------------------
+	#Armazena o B em v0
+	li $v0, 5
+	syscall
+	#-------------------------------------------------------------------------
+	
+	#Salva o valor de B em a3
+	move $a3, $v0
+	
+	xor $a2, $a2, $a3
+	
+	#Restaura o valor de a0 (x)
+	move $a0, $t1
+	
+	#Inverte as posições x
+	li $t5, 63
+	sub $a0, $t5, $a0
 	
 	#Achar o valor correspondente à memória dado pelo par (x,y)
 	#Se começar com (0,0), x=0, y=0
@@ -233,7 +294,7 @@ desenha_ponto:
 	add $t0, $t0, $t1
 	
 	#Faz o store do valor digitado
-	addi $t5, $zero, 0x00409811
+	add $t5, $zero, $a2
 	sw $t5, 0($t0)
 	
 	#-------------------------------------------------------------------------
