@@ -388,11 +388,17 @@ COLUNAO:
 	#----------------------condição para saber que configuração de direção para realizar o desenho do retangulo------------------------
 RETANGULO:	
 	slt $t7, $s1,$s3  
+	
+	#  salvar os valores dos contadores
+	add $s1,$zero, $t4
+	add $s3,$zero, $t3
+	
 	bne $t7, $zero,LOOP1
 	beq $t7, $zero,LOOP4
-	
 	#loop para variar a coluna(y------------>)e manter a linha(x) 
 LOOP1:	
+
+
 	sw $t5, 0($t0)
 	addi $t0, $t0,4
 	
@@ -409,14 +415,21 @@ LOOP1:
 	#LOOP2 para variar x para cima
 	LOOP2:
 	sw $t5, 0($t0)
-	addi $t0, $t0, 256
+	addi $t0, $t0, -256
 	
 	addi $t3, $t3,-1
-	beq $t3, $zero, sair2
+	beq $t3, $zero, SAVE2
 	j LOOP2
 
+	#SALVAR CONTADORES
+	SAVE2:
+		
+		add $t3,$zero, $s3
+		add $t4,$zero, $s1
+		j sair2
 	#SAIR2 para variar a coluna(y<----------------) e manter o (x)  
-		sair2:		
+		sair2:	 
+				
 			sw $t5, 0($t0)
 			addi $t0, $t0, -4
 	
@@ -426,8 +439,9 @@ LOOP1:
 	
 	#sair3 para variar a linha (x) de cima para baixo
 			sair3:	
+				
   				sw $t5, 0($t0)
-				addi $t0, $t0, -256
+				addi $t0, $t0, 256
 	
 				addi $t3, $t3,-1
 				beq $t3, $zero, menu
@@ -436,13 +450,21 @@ LOOP1:
 	#LOOP3 para variar as linhas x para baixo
 	LOOP3:
 		sw $t5, 0($t0)
-		addi $t0, $t0, -256
+		addi $t0, $t0, 256
 	
 		addi $t3, $t3,-1
-		beq $t3, $zero, sair4
-		j LOOP2
+		beq $t3, $zero, SAVE3
+		j LOOP3
+		
+		#SALVAR CONTADORES
+	SAVE3:
+		
+		add $t3,$zero, $s3
+		add $t4,$zero, $s1
+		j sair4
 	#sair4 par variar as conlunas y(<-------------)
 		sair4: 
+			
 			sw $t5, 0($t0)
 			addi $t0, $t0, -4
 	
@@ -452,8 +474,9 @@ LOOP1:
 	#sair5 para variar as linhas(x) de baixo para cima
 			
 			sair5:
+				
 				sw $t5, 0($t0)
-				addi $t0, $t0, 256
+				addi $t0, $t0, -256
 	
 				addi $t3, $t3,-1
 				beq $t3, $zero, menu
@@ -462,6 +485,8 @@ LOOP1:
 
 
 LOOP4:	
+	
+
 	#loop para variar a coluna(y<------------)e manter a linha(x) 	
 	sw $t5, 0($t0)
 	addi $t0, $t0,-4
@@ -478,15 +503,22 @@ LOOP4:
 	
 	#LOOP5 para variar as linhas(x) para cima
 	LOOP5:
+	
 	sw $t5, 0($t0)
-	addi $t0, $t0, 256
+	addi $t0, $t0, -256
 	
 	addi $t3, $t3,-1
-	beq $t3, $zero, sair7
+	beq $t3, $zero, SAVE7
 	j LOOP5
-
+	#SALVAR CONTADORES
+	SAVE7:
+		
+		add $t3,$zero, $s3
+		add $t4,$zero, $s1
+		j sair7
 	#SAIR7 para variar a coluna(y---------------->) e manter o (x)  
-		sair7:		
+		sair7:	
+				
 			sw $t5, 0($t0)
 			addi $t0, $t0, 4
 	
@@ -496,8 +528,10 @@ LOOP4:
 	
 	#sair8 para variar a linha (x) de cima para baixo
 			sair8:	
+				add $t3,$zero, $s3
+				
   				sw $t5, 0($t0)
-				addi $t0, $t0, -256
+				addi $t0, $t0, 256
 	
 				addi $t3, $t3,-1
 				beq $t3, $zero, menu
@@ -506,13 +540,21 @@ LOOP4:
 	#LOOP6 para variar as linhas x  de cima para baixo
 	LOOP6:
 		sw $t5, 0($t0)
-		addi $t0, $t0, -256
+		addi $t0, $t0, 256
 	
 		addi $t3, $t3,-1
-		beq $t3, $zero, sair9
+		beq $t3, $zero, SAVE9
 		j LOOP6
+		
+		#SALVAR CONTADORES
+		SAVE9:
+		
+		add $t3,$zero, $s3
+		add $t4,$zero, $s1
+		j sair9
 	#sair8 par variar as conlunas y(------------->)
 		sair9: 
+			
 			sw $t5, 0($t0)
 			addi $t0, $t0, 4
 	
@@ -522,8 +564,9 @@ LOOP4:
 	#sair5 para variar as linhas(x) de baixo para cima
 			
 			sair10:
+				
 				sw $t5, 0($t0)
-				addi $t0, $t0, 256
+				addi $t0, $t0, -256
 	
 				addi $t3, $t3,-1
 				beq $t3, $zero, menu
