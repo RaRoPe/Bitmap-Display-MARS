@@ -108,7 +108,7 @@ desenha_retangulo_sem_preenchimento:
 	la $t0, obtem_ponto_s5
 	
 	#Salva o valor de a0 (xi) em t1
-	move $t1, $a0
+	#move $t1, $a0
 	
 	#-------------------------------------------------------------------------
 	#Printa para que seja digitado o valor de yi
@@ -121,7 +121,7 @@ desenha_retangulo_sem_preenchimento:
 	add $t5, $zero, $zero
 	#-------------------------------------------------------------------------
 	#Restaura o valor de a0 (xi)
-	move $a0, $t1
+	#move $a0, $t1
 	
 	#Armazena o inteiro lido em v0 (yi)
 	li $v0, 5
@@ -164,7 +164,7 @@ desenha_retangulo_sem_preenchimento:
 	la $t0, obtem_ponto_s6
 	
 	#Salva o valor de a2 (xf) em t1
-	move $t1, $a0
+	#move $t1, $a0
 	
 	#-------------------------------------------------------------------------
 	#Printa para que seja digitado o valor de yf
@@ -176,7 +176,7 @@ desenha_retangulo_sem_preenchimento:
         #Zera o registrador $t5
 	add $t5, $zero, $zero
 	#Restaura o valor de a2 (xf)
-	move $a0, $t1
+	#move $a0, $t1
 	
 	#-------------------------------------------------------------------------
 	#Armazena o inteiro lido em v0 (yf)
@@ -291,7 +291,7 @@ desenha_retangulo_sem_preenchimento:
 	
 	#Faz o store do valor digitado
 	add $t5, $zero, $a2
-	sw $t5, 0($t0)
+	#sw $t5, 0($t0)
 	
 	#-------------------------------------------------------------------------
 	#Printa inteiro (a0) 
@@ -309,6 +309,8 @@ desenha_retangulo_sem_preenchimento:
 	beq $t7, $zero, LINHAS2
 	
 	# comprimento do retangulo
+
+COLUNAO:	
 	slt $t7, $s1,$s3
 	bne $t7, $zero, COLUNAS
 	beq $t7, $zero, COLUNAS2
@@ -317,19 +319,19 @@ desenha_retangulo_sem_preenchimento:
 				
 	LINHAS:
 	sub $t3, $s2,$s0
-	jr $ra 
+	j COLUNAO 
  	
 	LINHAS2:
 	sub $t3, $s0,$s2
-	jr $ra 	
+	j COLUNAO	
 
 	COLUNAS:
 	sub $t4, $s3,$s1
-	jr $ra 
+	j RETANGULO 
  	
 	COLUNAS2:
 	sub $t4, $s1,$s3
-	jr $ra 
+	j RETANGULO
 
 	#--------------------------------------Xi e Yi----------------------------------
 	#Achar o valor correspondente Ã  memÃ³ria dado pelo par (x,y)
@@ -384,6 +386,7 @@ desenha_retangulo_sem_preenchimento:
 	#move $s2,$t6
 	
 	#----------------------condição para saber que configuração de direção para realizar o desenho do retangulo------------------------
+RETANGULO:	
 	slt $t7, $s1,$s3  
 	bne $t7, $zero,LOOP1
 	beq $t7, $zero,LOOP4
